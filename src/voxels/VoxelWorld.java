@@ -22,7 +22,7 @@ import com.jme3.texture.Texture;
 import com.jme3.util.BufferUtils;
 
 /**
- * Created by didyouloseyourdog on 8/10/14.
+ * Created by didyouloseyourdog on 8/1 0/14.
  */
 public class VoxelWorld extends SimpleApplication
 {
