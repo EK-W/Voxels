@@ -6,6 +6,8 @@ import java.util.List;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 
+import voxels.generate.TerrainMap;
+import voxels.map.BlockType;
 import voxels.map.Coord3;
 
 public class BlockMeshUtil {
@@ -14,10 +16,10 @@ public class BlockMeshUtil {
  * 6 indices and 4 UV vector2s
  * add them to mesh Set
  */
-public static void AddFaceMeshData(Coord3 pos, MeshSet mset, int direction, int triIndexStart)
+public static void AddFaceMeshData(Coord3 pos, MeshSet mset, int direction, int triIndexStart,BlockType block)
 {
     FaceVertices(mset, pos, direction);
-    UVsForDirection(mset, direction);
+    UVsForDirection(mset, direction,block);
     IndicesForDirection(mset, triIndexStart);
 }
 
@@ -34,40 +36,38 @@ public static Vector3f[][] faceVertices = new Vector3f[][] {
 	},
 	//Xpos
 	new Vector3f[] {
-		new Vector3f(0.5f, -0.5f, -0.5f),
-		new Vector3f(0.5f, -0.5f, 0.5f),
-		new Vector3f(0.5f,  0.5f, 0.5f),
+		new Vector3f(0.5f, -0.5f,  0.5f),
+		new Vector3f(0.5f,  0.5f,  0.5f),
 		new Vector3f(0.5f,  0.5f, -0.5f),
+		new Vector3f(0.5f, -0.5f, -0.5f),
 	},
 	//Yneg
 	new Vector3f[] {
 			new Vector3f(-0.5f, -0.5f, -0.5f),
-			new Vector3f(-0.5f, -0.5f, 0.5f),
-			new Vector3f(0.5f, -0.5f, 0.5f),
-		
-			new Vector3f(0.5f, -0.5f, -0.5f),
+			new Vector3f(-0.5f, -0.5f,  0.5f),
+			new Vector3f( 0.5f, -0.5f,  0.5f),
+			new Vector3f( 0.5f, -0.5f, -0.5f),
 		},
 	//Ypos
 	new Vector3f[] {
-			new Vector3f(-0.5f, 0.5f,  -0.5f),
-			new Vector3f(0.5f,0.5f,  -0.5f),
-			new Vector3f(0.5f, 0.5f, 0.5f),
-			new Vector3f(-0.5f,0.5f, 0.5f),
+			new Vector3f(-0.5f, 0.5f, -0.5f),
+			new Vector3f( 0.5f, 0.5f, -0.5f),
+			new Vector3f( 0.5f, 0.5f,  0.5f),
+			new Vector3f(-0.5f, 0.5f,  0.5f),
 		},
 		//Zneg
 	new Vector3f[] {
-			new Vector3f(-0.5f, -0.5f,  -0.5f),
-			new Vector3f(0.5f, -0.5f,  -0.5f),
-			new Vector3f(0.5f, 0.5f, -0.5f),
+			new Vector3f( 0.5f,-0.5f, -0.5f),
+			new Vector3f( 0.5f, 0.5f, -0.5f),
 			new Vector3f(-0.5f, 0.5f, -0.5f),
+			new Vector3f(-0.5f,-0.5f, -0.5f),
 		},
 		//Zpos
 	new Vector3f[] {
-			new Vector3f(-0.5f,-0.5f,0.5f),
-			new Vector3f(-0.5f,0.5f,0.5f),
-			new Vector3f(0.5f,0.5f,0.5f),
-		
-			new Vector3f(0.5f,-0.5f,0.5f),
+			new Vector3f(-0.5f,-0.5f, 0.5f),
+			new Vector3f(-0.5f, 0.5f, 0.5f),
+			new Vector3f( 0.5f, 0.5f, 0.5f),
+			new Vector3f( 0.5f,-0.5f, 0.5f),
 		}
 };
 
@@ -91,7 +91,7 @@ private static void FaceVertices(MeshSet mset, Coord3 position, int dir ) {
 //	}
 //	
 //}
-private static void UVsForDirection(MeshSet mset, int dir) {
+private static void UVsForDirection(MeshSet mset, int dir, BlockType block) {
 //  mset.uvs.addAll(uvs); // DELETE THIS!
   /*
    * CHANGE THE X AND Y OF OFFSETSTART. X AND Y CAN EACH BE 0f, .25f, .5f, or .75f 
@@ -101,7 +101,7 @@ private static void UVsForDirection(MeshSet mset, int dir) {
    * http://voxel.matthewpoindexter.com/class/block-faces-part-2-1-fixing-the-annoyingly-mis-aligned-texture/
    * FOR THIS TO WORK (WELL). 
    */
-  Vector2f offsetStart = new Vector2f(.25f,.75f);
+  Vector2f offsetStart = BlockType.GetFaceTextureCoords(block,dir);
   mset.uvs.addAll(Arrays.asList(
           offsetStart ,
           new Vector2f(offsetStart.x, offsetStart.y +.25f),
@@ -112,8 +112,26 @@ private static void UVsForDirection(MeshSet mset, int dir) {
 
     private static void IndicesForDirection(MeshSet mset, int triIndexStart) {
         for (int i : FaceIndices) {
-            mset.indices.add(i + (triIndexStart*4));
+//            mset.indices.add(i + (triIndexStart*4)); //
+            mset.indices.add(i + (triIndexStart));
         }
     }
-    
+	public static void AddFaceMeshLightData(Coord3 pos, MeshSet mset, int dir, TerrainMap map) {
+		for(Vector3f ver : faceVertices[dir]) {
+            float[] color;// = GetSmoothVertexLight(map, pos, ver, dir);
+            
+            float [][] neighborColors = new float[4][];
+            neighborColors[0] = getBlockLightInfo(pos,dir); //PARAMETERS ARE PLACEHOLDERS! PLACEHOLDERS I TELLS YA!
+            neighborColors[1] = getBlockLightInfo(pos,dir);
+            
+            //To Do: Get correct light for given corner of face or something
+            for (float c : color) {
+                mset.colors.add(c);
+            }
+        }
+		
+	}
+    private static float[] getBlockLightInfo(Coord3 pos, int dir){
+    	return new float[]{0,0,0,0.1f};
+    }
 }
