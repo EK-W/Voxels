@@ -6,6 +6,7 @@ import java.util.List;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 
+import voxels.map.Direction;
 import voxels.generate.TerrainMap;
 import voxels.map.BlockType;
 import voxels.map.Coord3;
@@ -118,11 +119,7 @@ private static void UVsForDirection(MeshSet mset, int dir, BlockType block) {
     }
 	public static void AddFaceMeshLightData(Coord3 pos, MeshSet mset, int dir, TerrainMap map) {
 		for(Vector3f ver : faceVertices[dir]) {
-            float[] color;// = GetSmoothVertexLight(map, pos, ver, dir);
-            
-            float [][] neighborColors = new float[4][];
-            neighborColors[0] = getBlockLightInfo(pos,dir); //PARAMETERS ARE PLACEHOLDERS! PLACEHOLDERS I TELLS YA!
-            neighborColors[1] = getBlockLightInfo(pos,dir);
+            float[] color = GetSmoothVertexLight(pos, ver, map, dir);
             
             //To Do: Get correct light for given corner of face or something
             for (float c : color) {
@@ -131,7 +128,39 @@ private static void UVsForDirection(MeshSet mset, int dir, BlockType block) {
         }
 		
 	}
-    private static float[] getBlockLightInfo(Coord3 pos, int dir){
-    	return new float[]{0,0,0,0.1f};
-    }
+	public static float[] GetSmoothVertexLight(Coord3 pos, Vector3f ver, TerrainMap map, int dir) {
+		int dx = (int)Math.signum( ver.x );
+		int dy = (int)Math.signum( ver.y );
+		int dz = (int)Math.signum( ver.z );
+		
+		Coord3 a, b, c, d;
+		if(Direction.isX(dir)) { // X
+			a = pos.add(new Coord3(dx, 0,  0));
+			b = pos.add(new Coord3(dx, dy, 0));
+			c = pos.add(new Coord3(dx, 0,  dz));
+			d = pos.add(new Coord3(dx, dy, dz));
+		} else 
+		if(Direction.isY(dir)) { // Y
+			a = pos.add(new Coord3(0,  dy, 0));
+			b = pos.add(new Coord3(dx, dy, 0));
+			c = pos.add(new Coord3(0,  dy, dz));
+			d = pos.add(new Coord3(dx, dy, dz));
+		} else { // Z
+			a = pos.add(new Coord3(0,  0,  dz));
+			b = pos.add(new Coord3(dx, 0,  dz));
+			c = pos.add(new Coord3(0,  dy, dz));
+			d = pos.add(new Coord3(dx, dy, dz));
+		}
+		float average;
+		if(map.getBlockAt(b).isSolid()&&map.getBlockAt(c).isSolid()){
+			average = (map.getLight(a) + map.getLight(b) + map.getLight(c))/3;
+		}else{
+			average = (map.getLight(a) + map.getLight(b) + map.getLight(c)+map.getLight(d))/4;
+		}
+		if(average<TerrainMap.MIN_LIGHT){
+			average=TerrainMap.MIN_LIGHT;
+		}
+		average/=TerrainMap.MAX_LIGHT;
+		return new float[] { 0f, 0f, 0f, average };
+	}
 }

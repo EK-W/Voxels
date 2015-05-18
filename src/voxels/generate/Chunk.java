@@ -2,6 +2,7 @@ package voxels.generate;
 
 import voxels.map.BlockType;
 import voxels.map.Coord3;
+import voxels_initial_setup.Fake3DArray;
 
 /*
  * 
@@ -21,6 +22,8 @@ public class Chunk {
 	public final Coord3 position;
 	public final TerrainMap terrainMap;
 	public final ChunkBrain brain = new ChunkBrain(this);
+	public Fake3DArray lightMap = new Fake3DArray(XLENGTH, YLENGTH, ZLENGTH);
+
 
     public Chunk(Coord3 _position, TerrainMap _terrainMap) {
         position = _position;
