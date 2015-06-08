@@ -12,7 +12,7 @@ import voxels.map.BlockType;
 import voxels.map.Coord3;
 
 public class BlockMeshUtil {
-    /*
+ /*
  * Make four verts,
  * 6 indices and 4 UV vector2s
  * add them to mesh Set
@@ -117,18 +117,38 @@ private static void UVsForDirection(MeshSet mset, int dir, BlockType block) {
             mset.indices.add(i + (triIndexStart));
         }
     }
-	public static void AddFaceMeshLightData(Coord3 pos, MeshSet mset, int dir, TerrainMap map) {
-		for(Vector3f ver : faceVertices[dir]) {
-            float[] color = GetSmoothVertexLight(pos, ver, map, dir);
-            
-            //To Do: Get correct light for given corner of face or something
-            for (float c : color) {
-                mset.colors.add(c);
-            }
-        }
+//	public static void AddFaceMeshLightData(Coord3 pos, MeshSet mset, int dir, TerrainMap map) {
+//		for(Vector3f ver : faceVertices[dir]) {
+//            float[] color = GetSmoothVertexLight(pos, ver, map, dir);
+//            
+//            //To Do: Get correct light for given corner of face or something
+//            for (float c : color) {
+//                mset.colors.add(c);
+//            }
+//        }
+//		
+//	}
+	public static void AddBlockMeshLightData(Coord3 pos, MeshSet mset, TerrainMap map, int dir) {
+//		float averageLightLevel = -1;
+		//for(int dir=0;dir<6;dir++){
+			for(Vector3f ver : faceVertices[dir]) {
+	            float[] color = getFirstShaderColor(pos, ver, map, dir);
+//	            if(averageLightLevel==-1){
+//	            	averageLightLevel=color[3]/6;
+//	            }else{
+//	            	averageLightLevel=averageLightLevel+(color[3]/6);
+//	            }
+	            //To Do: Get correct light for given corner of face or something
+	            for (float c : color) {
+	                mset.colors.add(c);
+	            }
+	        }
+		//}
+//		map.
 		
 	}
-	public static float[] GetSmoothVertexLight(Coord3 pos, Vector3f ver, TerrainMap map, int dir) {
+	
+	public static float[] getFirstShaderColor(Coord3 pos, Vector3f ver, TerrainMap map, int dir) {
 		int dx = (int)Math.signum( ver.x );
 		int dy = (int)Math.signum( ver.y );
 		int dz = (int)Math.signum( ver.z );

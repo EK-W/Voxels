@@ -23,6 +23,7 @@ public class Chunk {
 	public final TerrainMap terrainMap;
 	public final ChunkBrain brain = new ChunkBrain(this);
 	public Fake3DArray lightMap = new Fake3DArray(XLENGTH, YLENGTH, ZLENGTH);
+	public Fake3DArray blockMap = new Fake3DArray(XLENGTH, YLENGTH, ZLENGTH);
 
 
     public Chunk(Coord3 _position, TerrainMap _terrainMap) {
@@ -64,6 +65,14 @@ public class Chunk {
             int worldZ = (chunkPosition.z << SIZE_Z_BITS);
         	return new Coord3(worldX,worldY,worldZ); // HINT: use the method below to find the world position of a block at localPosition = (0,0,0)
         }
+        
+        public void getAndSaveLightData(Coord3 localPosition){
+        	if(terrainMap.getBlockAt(ToWorldPosition(position,localPosition)).isSolid()){
+        		lightMap.set(localPosition.x, localPosition.y, localPosition.z, 0);
+        	}
+        	
+        }
+        
         public static Coord3 ToWorldPosition(Coord3 chunkPosition, Coord3 localPosition) {
             /*
              * Opposite of ToChunkPosition
@@ -74,6 +83,8 @@ public class Chunk {
             return new Coord3(worldX, worldY, worldZ);
         }
 		
+        
+        
 		public Coord3 getPosition() {
 			return position;
 		}
@@ -83,10 +94,10 @@ public class Chunk {
 		}
 		
 		public BlockType blockAt(Coord3 local){
-			return BlockType.MISSINGNO;//DUMB PLACEHOLDER METHOD
+			return BlockType.findBlock(blockMap.get(local.x, local.y, local.z));
 		}
 		public void setBlockAt(Coord3 local, BlockType blockType){
-			//do NOTHING
+			blockMap.set(local.x, local.y, local.z, blockType.getIndex());
 		}
 		
     }
